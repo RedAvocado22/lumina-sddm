@@ -1,17 +1,23 @@
 # lumina-sddm
 
-An adaptive SDDM login theme for Hyprland + Wayland. Automatically extracts colors from your wallpaper and builds a matching palette using Oklch color space.
+An adaptive SDDM login theme for Hyprland + Wayland. Automatically extracts colors from your wallpaper and generates a matching palette using the Oklch color space — so every time your wallpaper changes, your login screen changes with it.
 
-![preview](preview.png)
+## Previews
+
+| | |
+|---|---|
+| ![](previews/preview1.png) | ![](previews/preview2.png) |
+| ![](previews/preview3.png) | ![](previews/preview4.png) |
 
 ## Features
 
-- Wallpaper-synced color palette (Oklch-based)
+- Wallpaper-synced color palette via Oklch color extraction
 - Frosted glass split layout
-- Live clock, battery, hostname pills
-- Animated avatar with glow ring
+- Live clock with AM/PM, battery indicator, hostname pills
+- Smooth animated avatar with glow ring
 - Session picker + power confirm overlay
-- Bundled fonts (Rubik + Material Symbols Rounded)
+- Bundled fonts — no system font dependency (Rubik + Material Symbols Rounded)
+- Works with Caelestia shell wallpaper sync
 
 ## Requirements
 
@@ -90,10 +96,9 @@ misc {
 
 ## Wallpaper Sync
 
-To sync wallpaper automatically on change (Caelestia shell):
+Syncs automatically with Caelestia shell on wallpaper change:
 
 ```bash
-# Enable user systemd path watcher
 systemctl --user enable --now lumina-wallpaper-sync.path
 ```
 

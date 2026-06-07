@@ -1,0 +1,9 @@
+[SddmGreeterTheme]
+Name=Lumina SDDM
+Description=Adaptive color login screen with wallpaper-matched palette
+Author=RedAvocado22
+Version=1.0
+Website=https://github.com/RedAvocado22/lumina-sddm
+Screenshot=preview.png
+Type=sddm-theme
+QtVersion=6

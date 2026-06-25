@@ -15,7 +15,9 @@ fi
 echo "Installing lumina-sddm..."
 
 # Theme
-cp -r "$(dirname "$0")" "$THEME_DIR"
+rm -rf "$THEME_DIR"
+mkdir -p "$THEME_DIR"
+cp -r "$(dirname "$0")"/. "$THEME_DIR"/
 chmod -R 755 "$THEME_DIR"
 
 # Fonts

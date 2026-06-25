@@ -86,7 +86,7 @@ Item {
     // ====== STATE ======
     property string authState:          "idle"
     property bool   showPw:             false
-    property bool   capsOn:             false
+    property bool   capsOn:             keyboard.capsLock
     property int    currentSession:     0
     property string currentSessionName: "Hyprland"
     property string currentUser:        ""
@@ -366,7 +366,11 @@ Item {
             Row {
                 id: pillKbd; anchors.centerIn: parent; spacing: 6
                 Text { text: "keyboard"; font.family: "Material Symbols Rounded"; font.pixelSize: 16; color: pal.onSurfaceDim; anchors.verticalCenter: parent.verticalCenter }
-                Text { text: "VI"; font.family: "Rubik"; font.pixelSize: 15; font.weight: Font.Bold; color: pal.onSurfaceDim; anchors.verticalCenter: parent.verticalCenter }
+                Text {
+                    text: (keyboard.layouts.length > keyboard.currentLayout && keyboard.layouts[keyboard.currentLayout])
+                        ? keyboard.layouts[keyboard.currentLayout].shortName.toUpperCase() : "??"
+                    font.family: "Rubik"; font.pixelSize: 15; font.weight: Font.Bold; color: pal.onSurfaceDim; anchors.verticalCenter: parent.verticalCenter
+                }
             }
         }
     }

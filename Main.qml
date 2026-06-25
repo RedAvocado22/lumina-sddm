@@ -101,6 +101,12 @@ Item {
     property int  batteryLevel:    -1
     property bool batteryCharging: false
 
+    // network / bluetooth
+    property string wifiIface:     ""
+    property bool   wifiRadioOn:   true
+    property bool   wifiConnected: false
+    property bool   btRadioOn:     true
+
     function _readFile(path) {
         var xhr = new XMLHttpRequest()
         xhr.open("GET", "file://" + path, false)
@@ -119,6 +125,31 @@ Item {
             }
         }
         batteryLevel = -1
+    }
+    function _rfkillOn(type) {
+        for (var i = 0; i < 8; i++) {
+            var base = "/sys/class/rfkill/rfkill" + i
+            if (_readFile(base + "/type") === type)
+                return _readFile(base + "/state") === "1"
+        }
+        return true
+    }
+    function _detectWifiIface() {
+        var candidates = ["wlp4s0", "wlan0", "wlo1", "wlp2s0", "wlp3s0", "wlp1s0", "wlp5s0"]
+        for (var i = 0; i < candidates.length; i++) {
+            if (_readFile("/sys/class/net/" + candidates[i] + "/operstate") !== "")
+                return candidates[i]
+        }
+        return ""
+    }
+    function _updateNetwork() {
+        wifiRadioOn = _rfkillOn("wlan")
+        if (wifiIface === "") wifiIface = _detectWifiIface()
+        wifiConnected = wifiRadioOn && wifiIface !== ""
+            && _readFile("/sys/class/net/" + wifiIface + "/operstate") === "up"
+    }
+    function _updateBluetooth() {
+        btRadioOn = _rfkillOn("bluetooth")
     }
 
     onCurrentSessionChanged: {
@@ -148,12 +179,14 @@ Item {
         if (config.hint  && config.hint  !== "") hintText  = config.hint
         hour24 = (config.hour24 === "true")
         _updateBattery()
+        _updateNetwork()
+        _updateBluetooth()
         root.requestActivate()
     }
 
     Timer {
         interval: 60000; running: true; repeat: true
-        onTriggered: _updateBattery()
+        onTriggered: { _updateBattery(); _updateNetwork(); _updateBluetooth() }
     }
 
     property string greeting: {
@@ -261,8 +294,16 @@ Item {
             width: pillWifi.implicitWidth + 24
             Row {
                 id: pillWifi; anchors.centerIn: parent; spacing: 6
-                Text { text: "wifi"; font.family: "Material Symbols Rounded"; font.pixelSize: 16; color: pal.onSurfaceDim; anchors.verticalCenter: parent.verticalCenter }
-                Text { text: sddm.hostName || "network"; font.family: "Rubik"; font.pixelSize: 15; font.weight: Font.Bold; color: pal.onSurfaceDim; anchors.verticalCenter: parent.verticalCenter }
+                Text {
+                    text: !wifiRadioOn ? "wifi_off" : wifiConnected ? "wifi" : "wifi_off"
+                    font.family: "Material Symbols Rounded"; font.pixelSize: 16
+                    color: pal.onSurfaceDim; anchors.verticalCenter: parent.verticalCenter
+                }
+                Text {
+                    text: !wifiRadioOn ? "Off" : wifiConnected ? "Connected" : "No network"
+                    font.family: "Rubik"; font.pixelSize: 15; font.weight: Font.Bold
+                    color: pal.onSurfaceDim; anchors.verticalCenter: parent.verticalCenter
+                }
             }
         }
 
@@ -271,8 +312,20 @@ Item {
             height: 34; radius: 17
             color: Qt.rgba(pal.surface1.r, pal.surface1.g, pal.surface1.b, 0.70)
             border.color: Qt.rgba(1,1,1, 0.10); border.width: 1
-            width: 52
-            Text { anchors.centerIn: parent; text: "bluetooth"; font.family: "Material Symbols Rounded"; font.pixelSize: 16; color: pal.onSurfaceDim }
+            width: pillBt.implicitWidth + 24
+            Row {
+                id: pillBt; anchors.centerIn: parent; spacing: 6
+                Text {
+                    text: btRadioOn ? "bluetooth" : "bluetooth_disabled"
+                    font.family: "Material Symbols Rounded"; font.pixelSize: 16
+                    color: pal.onSurfaceDim; anchors.verticalCenter: parent.verticalCenter
+                }
+                Text {
+                    text: btRadioOn ? "On" : "Off"
+                    font.family: "Rubik"; font.pixelSize: 15; font.weight: Font.Bold
+                    color: pal.onSurfaceDim; anchors.verticalCenter: parent.verticalCenter
+                }
+            }
         }
 
         // battery
